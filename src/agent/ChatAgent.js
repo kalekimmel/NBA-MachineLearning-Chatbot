@@ -6,7 +6,7 @@ const createChatAgent = () => {
 
 
     const handleInitialize = async () => {
-        return "This will predict Lakers chance of winning versus any NBA team in 2022 based on data pulled from the 2022 season. Type in an opponent to see the Lakers' chance of winning against them, for example 'List of options: Clippers, Bulls, Hawks, Nets, Magic, Warriors, Jazz, Suns, Pacers, Thunder, Knicks, Mavs, Raptors, Celtics, Timberwolves, Pelicans, Bucks, Grizzlies, Hornets, Wizards, 76ers, Nuggets, Trail Blazers, Rockets, Heat, Pistons, Cavs, Spurs, Kings'"
+        return "This will predict Lakers chance of winning versus any NBA team based on data pulled from the 2022 season and my machine learning model. Type in an opponent to see the Lakers' chance of winning against them, for example 'List of options: Clippers, Bulls, Hawks, Nets, Magic, Warriors, Jazz, Suns, Pacers, Thunder, Knicks, Mavs, Raptors, Celtics, Timberwolves, Pelicans, Bucks, Grizzlies, Hornets, Wizards, 76ers, Nuggets, Trail Blazers, Rockets, Heat, Pistons, Cavs, Spurs, Kings'"
     }
 
     const handleReceive = async (prompt) => {
