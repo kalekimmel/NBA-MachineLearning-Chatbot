@@ -108,7 +108,7 @@ const createChatAgent = () => {
                 return "Lakers Season Win Percentage: 37.72%, Hornets Season Win Percentage: 53.24%, Lakers Points Per Game: 113.11, Hornets Points Per Game: 112.40, Lakers Win Probability Versus Hornets: 47%"
             }
             if(intent==="Code"){
-                return `(check https://github.com/kalekimmel/NBA-Machine-Learning for full code)import pandas as pd
+                return `(check https://github.com/kalekimmel/NBA-Machine-Learning for full code, this is only for win predictor)import pandas as pd
                 from sklearn.model_selection import train_test_split
                 from sklearn.ensemble import RandomForestClassifier
                 from sklearn.metrics import accuracy_score
