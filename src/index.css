@@ -3,14 +3,31 @@
   margin: 20px;
   padding: 20px;
   border: 1px solid #ccc;
-  max-width: 600px;
+  max-width: 1200px; /* Increase max-width to accommodate both charts and messages */
   margin: auto;
-  margin-top: 1rem
+  margin-top: 1rem;
 }
 
-.inline-form {
+.content {
   display: flex;
-  width: 100%;
+  align-items: flex-start;
+}
+
+.chart-area {
+  display: flex;
+  flex-wrap: wrap; /* Allow wrapping if the screen is too narrow */
+  margin: 20px;
+  gap: 20px; /* Add some space between the charts */
+}
+
+.chart-wrapper {
+  flex: 1;
+  min-width: 300px; /* Ensure the charts have a minimum width */
+}
+
+.message-area {
+  flex: 2;
+  margin: 20px;
 }
 
 .message-list {
@@ -49,4 +66,9 @@
 .input-area {
   display: flex;
   justify-content: space-between;
+}
+
+.inline-form {
+  display: flex;
+  width: 100%;
 }

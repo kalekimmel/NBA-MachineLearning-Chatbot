@@ -6,7 +6,7 @@ const createChatAgent = () => {
 
 
     const handleInitialize = async () => {
-        return "This will predict Lakers chance of winning versus any NBA team based on data pulled from the 2022 season and my machine learning model. Type in an opponent to see the Lakers' chance of winning against them, for example 'List of options: Clippers, Bulls, Hawks, Nets, Magic, Warriors, Jazz, Suns, Pacers, Thunder, Knicks, Mavs, Raptors, Celtics, Timberwolves, Pelicans, Bucks, Grizzlies, Hornets, Wizards, 76ers, Nuggets, Trail Blazers, Rockets, Heat, Pistons, Cavs, Spurs, Kings'"
+        return ["This will predict the Lakers' chance of winning versus any NBA team based on data pulled from the 2022 season and my machine learning model. This is one purpose out of many trained in my machine learning model. I created this app using React and Wit.Ai as a more visual way to see what my machine learning model predicted.", "Type in an opponent to see the Lakers' chance of winning against them, for example 'List of options: Clippers, Bulls, Hawks, Nets, Magic, Warriors, Jazz, Suns, Pacers, Thunder, Knicks, Mavs, Raptors, Celtics, Timberwolves, Pelicans, Bucks, Grizzlies, Hornets, Wizards, 76ers, Nuggets, Trail Blazers, Rockets, Heat, Pistons, Cavs, Spurs, Kings'","To learn about all of the different purposes I trained my model for, type 'All purposes'","To see my code for this win predictor, type 'Code'","To see one example of my iterative process and improving my model, type 'Process'"]
     }
 
     const handleReceive = async (prompt) => {
@@ -107,16 +107,142 @@ const createChatAgent = () => {
             if(intent==="Hornets"){
                 return "Lakers Season Win Percentage: 37.72%, Hornets Season Win Percentage: 53.24%, Lakers Points Per Game: 113.11, Hornets Points Per Game: 112.40, Lakers Win Probability Versus Hornets: 47%"
             }
-            
-            
-            
-            
-            
-            
-            
+            if(intent==="Code"){
+                return `(check https://github.com/kalekimmel/NBA-Machine-Learning for full code)import pandas as pd
+                from sklearn.model_selection import train_test_split
+                from sklearn.ensemble import RandomForestClassifier
+                from sklearn.metrics import accuracy_score
+
+                # Load the data
+                gamesAll = pd.read_csv("games.csv", index_col=0)
+
+                # Filter games for the 2022 season
+                games2022 = gamesAll[gamesAll["SEASON"] == 2022]
+
+                # Preprocess the data
+                games2022 = games2022.dropna()
+
+                # Aggregate team statistics
+                home_stats = games2022.groupby('HOME_TEAM_ID').agg({
+                    'PTS_home': 'mean', 
+                    'FG_PCT_home': 'mean', 
+                    'FT_PCT_home': 'mean', 
+                    'FG3_PCT_home': 'mean', 
+                    'AST_home': 'mean', 
+                    'REB_home': 'mean'
+                }).rename(columns=lambda x: x.replace('_home', ''))
+
+                away_stats = games2022.groupby('VISITOR_TEAM_ID').agg({
+                    'PTS_away': 'mean', 
+                    'FG_PCT_away': 'mean', 
+                    'FT_PCT_away': 'mean', 
+                    'FG3_PCT_away': 'mean', 
+                    'AST_away': 'mean', 
+                    'REB_away': 'mean'
+                }).rename(columns=lambda x: x.replace('_away', ''))
+
+                # Calculate points per game
+                ppg_home = home_stats[['PTS']]
+                ppg_away = away_stats[['PTS']]
+
+                # Combine home and away stats
+                team_stats = home_stats.add(away_stats, fill_value=0) / 2
+
+                # Calculate win percentages
+                home_wins = games2022.groupby('HOME_TEAM_ID')['HOME_TEAM_WINS'].mean()
+                away_wins = 1 - games2022.groupby('VISITOR_TEAM_ID')['HOME_TEAM_WINS'].mean()
+
+                win_percentages = pd.DataFrame({
+                    'TEAM_ID': home_wins.index,
+                    'WIN_PERCENTAGE': (home_wins + away_wins) / 2
+                }).set_index('TEAM_ID')
+
+                # Merge the win percentages and points per game with team stats
+                team_stats = team_stats.merge(win_percentages, left_index=True, right_index=True)
+                team_stats['PTS'] = (home_stats['PTS'] + away_stats['PTS']) / 2
+
+                # Define features and target
+                features = games2022[['PTS_home', 'FG_PCT_home', 'FT_PCT_home', 'FG3_PCT_home', 'AST_home', 'REB_home', 
+                                    'PTS_away', 'FG_PCT_away', 'FT_PCT_away', 'FG3_PCT_away', 'AST_away', 'REB_away']]
+                target = games2022['HOME_TEAM_WINS']
+
+                # Split the data into training and testing sets
+                X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2, random_state=42)
+
+                # Train the model
+                model = RandomForestClassifier(n_estimators=100, random_state=42)
+                model.fit(X_train, y_train)
+
+                # Evaluate the model
+                y_pred = model.predict(X_test)
+                accuracy = accuracy_score(y_test, y_pred)
+                print(f"Model Accuracy: {accuracy * 100:.2f}%")
+
+                # Function to predict the outcome of a new game using team IDs
+                def predict_game_by_team_id(home_team_id, away_team_id):
+                    # Fetch team statistics
+                    home_team_stats = team_stats.loc[home_team_id]
+                    away_team_stats = team_stats.loc[away_team_id]
+                    
+                    # Create a DataFrame for the new game
+                    new_game = pd.DataFrame({
+                        'PTS_home': [home_team_stats['PTS']], 'FG_PCT_home': [home_team_stats['FG_PCT']], 'FT_PCT_home': [home_team_stats['FT_PCT']], 
+                        'FG3_PCT_home': [home_team_stats['FG3_PCT']], 'AST_home': [home_team_stats['AST']], 'REB_home': [home_team_stats['REB']],
+                        'PTS_away': [away_team_stats['PTS']], 'FG_PCT_away': [away_team_stats['FG_PCT']], 'FT_PCT_away': [away_team_stats['FT_PCT']], 
+                        'FG3_PCT_away': [away_team_stats['FG3_PCT']], 'AST_away': [away_team_stats['AST']], 'REB_away': [away_team_stats['REB']]
+                    })
+                    
+                    # Predict the probabilities
+                    probabilities = model.predict_proba(new_game)
+                    home_win_prob = probabilities[0][1] * 100  # Probability of home team winning
+                    away_win_prob = probabilities[0][0] * 100  # Probability of away team winning
+
+                    # Print the win percentages and points per game
+                    print(f"Home Team Win Percentage: {home_team_stats['WIN_PERCENTAGE'] * 100:.2f}%")
+                    print(f"Away Team Win Percentage: {away_team_stats['WIN_PERCENTAGE'] * 100:.2f}%")
+                    print(f"Home Team Points Per Game: {home_team_stats['PTS']:.2f}")
+                    print(f"Away Team Points Per Game: {away_team_stats['PTS']:.2f}")
+                    
+                    return f"Home Team Win Probability: {home_win_prob:.2f}%, Away Team Win Probability: {away_win_prob:.2f}%"
+
+                # Example usage
+                result = predict_game_by_team_id(1610612747, 1610612748)  # Replace with actual team IDs
+                print(result)`
+                            }
+                            
+                            
+                            
+                            
+                            
+                            
+                        
            
-           
             
+            
+        
+        if(intent==="Process"){
+            return `from sklearn.model_selection import GridSearchCV
+            param_grid = {
+                'n_estimators': [50, 100, 200],
+                'max_depth': [None, 10, 20, 30],
+                'min_samples_split': [2, 10, 20]
+            }
+
+            grid_search = GridSearchCV(estimator=rf, param_grid=param_grid, cv=5, scoring='accuracy', n_jobs=-1)
+
+            grid_search.fit(train[predictors], train[target])
+
+            best_params = grid_search.best_params_
+            best_rf = grid_search.best_estimator_
+            print(f"Best parameters: {best_params}")
+            Best parameters: {'max_depth': 10, 'min_samples_split': 20, 'n_estimators': 50}
+
+             GridSearchCV helps in selecting the best hyperparameters that yield the highest accuracy for the given data.
+            `
+
+        }
+        if(intent==="All_purposes"){
+            return"1. Data preprocessing 2. Train on 7 seasons, try to predict winners of games in 2022 not for specific teams 3. See what teams model was better at correctly predicting results for 4. Hyperparameter tuning as well as random forest versus gradient boosting model evaluation 5. Create model to predict Lakers win likelihood against every team 6. Create model to predict scores of games"
             
         }
         else{
@@ -124,6 +250,7 @@ const createChatAgent = () => {
         }
         return "Sorry, I don't have that team on file."
     }
+}
 
     return {
         handleInitialize,
